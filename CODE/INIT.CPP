@@ -260,7 +260,9 @@ bool Init_Game(int , char * [])
 	/*
 	**	Initialize the animation system.
 	*/
+	RA_BREAD("before Anim_Init");
 	Anim_Init();
+	RA_BREAD("after Anim_Init");
 
 #ifndef FIXIT_VERSION_3			//	WChat eliminated.
 #ifdef WIN32
@@ -286,7 +288,9 @@ bool Init_Game(int , char * [])
 	if (!Special.IsFromInstall && !Special.IsFromWChat) {
 		VisiblePage.Clear();
 //		Mono_Printf("Playing Intro\n");
+		RA_BREAD("before Play_Intro");
 		Play_Intro();
+		RA_BREAD("after Play_Intro");
 		memset(CurrentPalette, 0x01, 768);
 		WhitePalette.Set();
 	} else {
@@ -296,7 +300,9 @@ bool Init_Game(int , char * [])
 	/*
 	**	Initialize the text remap tables.
 	*/
+	RA_BREAD("before Init_Color_Remaps");
 	Init_Color_Remaps();
+	RA_BREAD("after Init_Color_Remaps");
 
 	/*
 	**	Get authorization to access the game.
@@ -307,21 +313,27 @@ bool Init_Game(int , char * [])
 	/*
 	**	Set the logic page to the seenpage.
 	*/
+	RA_BREAD("before Set_Logic_Page");
 	Set_Logic_Page(SeenBuff);
+	RA_BREAD("after Set_Logic_Page");
 
 	/*
 	**	If not automatically launching into the intro, then display the title
 	**	page while the bulk data is cached.
 	*/
 	if (!Special.IsFromInstall) {
+		RA_BREAD("before Load_Title_Page");
 		Load_Title_Page(true);
+		RA_BREAD("after Load_Title_Page");
 
 		Hide_Mouse();
 		Fancy_Text_Print(TXT_STAND_BY, 160*RESFACTOR, 120*RESFACTOR, &ColorRemaps[PCOLOR_DIALOG_BLUE], TBLACK, TPF_CENTER|TPF_TEXT|TPF_DROPSHADOW);
 		Show_Mouse();
 
 		CCPalette.Set(FADE_PALETTE_SLOW);
+		RA_BREAD("before Call_Back");
 		Call_Back();
+		RA_BREAD("after Call_Back");
 	}
 
 	/*
