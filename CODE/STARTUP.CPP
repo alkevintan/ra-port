@@ -1,10 +1,3 @@
-
-#if defined(__ANDROID__)
-#include <android/log.h>
-#define RA_BREAD(m) __android_log_print(ANDROID_LOG_INFO, "RADIAG", "startup: %s", m)
-#else
-#define RA_BREAD(m) ((void)0)
-#endif
 /*
  * Copyright 2025 Electronic Arts Inc.
  *
@@ -100,7 +93,6 @@ int main(int argc, char * argv[])
 	** First thing to do is check if there is another instance of Red Alert already running
 	**  and if so, switch to the existing instance and terminate ourselves.
 	*/
-	RA_BREAD("WinMain entry");
 	SpawnedFromWChat = false;
 
 	if (RA95AlreadyRunning) {	//Set in the DDEServer constructor
@@ -336,9 +328,7 @@ int main(int argc, char * argv[])
 			return(EXIT_FAILURE);
 		}
 #else	//WIN32
-		RA_BREAD("before Init_Timer_System");
 		Init_Timer_System(60, true);
-		RA_BREAD("after Init_Timer_System");
 #endif	//WIN32
 		RawFileClass cfile(CONFIG_FILE_NAME);
 
@@ -605,11 +595,9 @@ int main(int argc, char * argv[])
 //				BreakoutAllowed = false;
 			}
 
-			RA_BREAD("before Main_Game");
 			Memory_Error_Exit = Print_Error_End_Exit;
 
 			Main_Game(argc, argv);
-			RA_BREAD("Main_Game returned");
 
 			#ifdef MPEGMOVIE // Denzil 6/15/98
 			if (MpgSettings != NULL)

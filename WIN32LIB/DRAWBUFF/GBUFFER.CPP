@@ -1,10 +1,3 @@
-#if defined(__ANDROID__)
-#include <android/log.h>
-static int ra_lock_logs = 0;
-#define RA_BREAD(m) do { if (ra_lock_logs < 25) { ++ra_lock_logs; __android_log_print(ANDROID_LOG_INFO, "RADIAG", "lock: %s", m); } } while(0)
-#else
-#define RA_BREAD(m) ((void)0)
-#endif
 /*
  * Copyright 2025 Electronic Arts Inc.
  *
@@ -505,23 +498,20 @@ BOOL GraphicBufferClass::Lock(void)
 	//
 	// If its not a direct draw surface then the lock is always sucessful.
 	//
-	RA_BREAD("Lock entry");
-	if (!IsDirectDraw) { RA_BREAD("not directdraw -> TRUE"); return(TRUE); }
+	if (!IsDirectDraw) return(TRUE);
 
 	/*
 	** If the video surface pointer is null then return
 	*/
-	if (!VideoSurfacePtr) { RA_BREAD("no surface ptr -> FALSE"); return (FALSE); }
+	if (!VideoSurfacePtr) return (FALSE);
 
 	/*
 	** If we dont have focus then return failure
 	*/
-	if (!GameInFocus) { RA_BREAD("not in focus -> FALSE"); return (FALSE); }
+	if (!GameInFocus) return (FALSE);
 
 
-	RA_BREAD("before Block_Mouse");
 	Block_Mouse(this);
-	RA_BREAD("after Block_Mouse");
 
 
 	//
@@ -539,9 +529,7 @@ BOOL GraphicBufferClass::Lock(void)
 	//
 
 	if (VideoSurfacePtr){
-		RA_BREAD("entering lock retry loop");
 		while (!LockCount && restore_attempts<2) {
-			RA_BREAD("lock retry iteration");
 			result = VideoSurfacePtr->Lock ( NULL
 										, &(VideoSurfaceDescription)
 										, DDLOCK_WAIT

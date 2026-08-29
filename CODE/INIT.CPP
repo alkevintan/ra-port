@@ -1,9 +1,3 @@
-#if defined(__ANDROID__)
-#include <android/log.h>
-#define RA_BREAD(m) __android_log_print(ANDROID_LOG_INFO, "RADIAG", "init: %s", m)
-#else
-#define RA_BREAD(m) ((void)0)
-#endif
 /*
  * Copyright 2025 Electronic Arts Inc.
  *
@@ -164,7 +158,6 @@ bool Init_Game(int , char * [])
 	/*
 	**	Initialize the encryption keys.
 	*/
-	RA_BREAD("Init_Keys");
 	Init_Keys();
 
 	/*
@@ -178,16 +171,13 @@ bool Init_Game(int , char * [])
 	**	Check for an initialize a working mouse pointer. Display error and bail if
 	**	no mouse driver is installed.
 	*/
-	RA_BREAD("Init_Mouse");
 	Init_Mouse();
 
 	/*
 	**	Initialize access to the CD-ROM and ensure that the CD is inserted. This can, and
 	**	most likely will, result in a visible prompt.
 	*/
-	RA_BREAD("before Init_CDROM_Access");
 	Init_CDROM_Access();
-	RA_BREAD("after Init_CDROM_Access");
 
 	if (Special.IsFromInstall) {
 		Load_Prolog_Page();
@@ -196,9 +186,7 @@ bool Init_Game(int , char * [])
 	/*
 	**	Register and cache any secondary mixfiles.
 	*/
-	RA_BREAD("before Init_Secondary_Mixfiles");
 	Init_Secondary_Mixfiles();
-	RA_BREAD("after Init_Secondary_Mixfiles");
 
 	/*
 	**	This is a special hack to initialize the heaps that must be in place before the
@@ -253,16 +241,12 @@ bool Init_Game(int , char * [])
 	/*
 	**	Initialize the game object heaps as well as other rules-dependant buffer allocations.
 	*/
-	RA_BREAD("before Init_Heaps");
 	Init_Heaps();
-	RA_BREAD("after Init_Heaps");
 
 	/*
 	**	Initialize the animation system.
 	*/
-	RA_BREAD("before Anim_Init");
 	Anim_Init();
-	RA_BREAD("after Anim_Init");
 
 #ifndef FIXIT_VERSION_3			//	WChat eliminated.
 #ifdef WIN32
@@ -288,9 +272,7 @@ bool Init_Game(int , char * [])
 	if (!Special.IsFromInstall && !Special.IsFromWChat) {
 		VisiblePage.Clear();
 //		Mono_Printf("Playing Intro\n");
-		RA_BREAD("before Play_Intro");
 		Play_Intro();
-		RA_BREAD("after Play_Intro");
 		memset(CurrentPalette, 0x01, 768);
 		WhitePalette.Set();
 	} else {
@@ -300,9 +282,7 @@ bool Init_Game(int , char * [])
 	/*
 	**	Initialize the text remap tables.
 	*/
-	RA_BREAD("before Init_Color_Remaps");
 	Init_Color_Remaps();
-	RA_BREAD("after Init_Color_Remaps");
 
 	/*
 	**	Get authorization to access the game.
@@ -313,27 +293,21 @@ bool Init_Game(int , char * [])
 	/*
 	**	Set the logic page to the seenpage.
 	*/
-	RA_BREAD("before Set_Logic_Page");
 	Set_Logic_Page(SeenBuff);
-	RA_BREAD("after Set_Logic_Page");
 
 	/*
 	**	If not automatically launching into the intro, then display the title
 	**	page while the bulk data is cached.
 	*/
 	if (!Special.IsFromInstall) {
-		RA_BREAD("before Load_Title_Page");
 		Load_Title_Page(true);
-		RA_BREAD("after Load_Title_Page");
 
 		Hide_Mouse();
 		Fancy_Text_Print(TXT_STAND_BY, 160*RESFACTOR, 120*RESFACTOR, &ColorRemaps[PCOLOR_DIALOG_BLUE], TBLACK, TPF_CENTER|TPF_TEXT|TPF_DROPSHADOW);
 		Show_Mouse();
 
 		CCPalette.Set(FADE_PALETTE_SLOW);
-		RA_BREAD("before Call_Back");
 		Call_Back();
-		RA_BREAD("after Call_Back");
 	}
 
 	/*
@@ -2840,25 +2814,17 @@ static void Init_Fonts(void)
  *=============================================================================================*/
 static void Init_CDROM_Access(void)
 {
-	RA_BREAD("CDROM: entered");
 #if defined(__ANDROID__)
-	RA_BREAD("CDROM: bypassed on Android (no optical drive)");
+	/*
+	**	Android has no optical drive. Game data lives in local storage, so the
+	**	CD handshake below -- Force_CD_Available(-1) followed by
+	**	CCFileClass::Set_Search_Drives("?:\\") -- scans for drive letters that
+	**	can never appear and startup never completes. Skip it entirely.
+	*/
 	return;
 #endif
 	VisiblePage.Clear();
-	RA_BREAD("CDROM: VisiblePage.Clear done");
 	HidPage.Clear();
-	RA_BREAD("CDROM: HidPage.Clear done");
-
-#if defined(__ANDROID__)
-	/*
-	**	Android has no CD-ROM. Game data is extracted to local storage, so the
-	**	drive-letter scan in Force_CD_Available()/Set_Search_Drives("?:\\")
-	**	never terminates. Skip the CD handshake entirely.
-	*/
-	RA_BREAD("Init_CDROM_Access: bypassed on Android");
-	return;
-#endif
 
 #ifdef FIXIT_VERSION_3
 	//	Determine if we're going to be running from a DVD.

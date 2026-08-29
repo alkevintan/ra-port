@@ -1,9 +1,3 @@
-#if defined(__ANDROID__)
-#include <android/log.h>
-#define RA_BREAD(m) __android_log_print(ANDROID_LOG_INFO, "RADIAG", "maingame: %s", m)
-#else
-#define RA_BREAD(m) ((void)0)
-#endif
 /*
  * Copyright 2025 Electronic Arts Inc.
  *
@@ -165,12 +159,9 @@ void Main_Game(int argc, char * argv[])
 	/*
 	**	Perform one-time-only initializations
 	*/
-	RA_BREAD("before Init_Game");
 	if (!Init_Game(argc, argv)) {
-		RA_BREAD("Init_Game FAILED");
 		return;
 	}
-	RA_BREAD("after Init_Game OK");
 
 	/*
 	**	Game processing loop:
@@ -179,9 +170,7 @@ void Main_Game(int argc, char * argv[])
 	**	2) Invoke either the main-loop routine, or the editor-loop routine,
 	**		until they indicate that the user wants to exit the scenario.
 	*/
-	RA_BREAD("before Select_Game");
 	while (Select_Game(fade)) {
-		RA_BREAD("Select_Game returned true");
 		fade = false;
 		ScenarioInit = 0;		// Kludge.
 
