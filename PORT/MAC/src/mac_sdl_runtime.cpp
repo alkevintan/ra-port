@@ -767,15 +767,31 @@ int MacSDL_ConsumeMobilePointerDrag(int *x, int *y)
 
 void MacSDL_Present8(unsigned char const *pixels, int width, int height, int pitch)
 {
+	static int ra_diag_calls = 0;
+	static int ra_diag_badargs = 0;
+	static int ra_diag_thread = 0;
+	static int ra_diag_norender = 0;
+	static int ra_diag_viewport = 0;
+	static int ra_diag_presented = 0;
+	if ((ra_diag_calls % 120) == 0) {
+		SDL_Log("RADIAG present calls=%d badargs=%d thread=%d norender=%d viewport=%d presented=%d",
+			ra_diag_calls, ra_diag_badargs, ra_diag_thread, ra_diag_norender, ra_diag_viewport, ra_diag_presented);
+	}
+	++ra_diag_calls;
 	if (!pixels || width <= 0 || height <= 0) {
+		++ra_diag_badargs;
 		return;
 	}
 	if (MacMainThread && SDL_ThreadID() != MacMainThread) {
+		if (++ra_diag_thread <= 3) {
+			SDL_Log("RADIAG THREAD MISMATCH main=%lu cur=%lu", (unsigned long)MacMainThread, (unsigned long)SDL_ThreadID());
+		}
 		return;
 	}
 
 	mac_sdl_pump_events(false);
 	if (!MacRenderer || !MacTexture) {
+		++ra_diag_norender;
 		return;
 	}
 
@@ -805,8 +821,12 @@ void MacSDL_Present8(unsigned char const *pixels, int width, int height, int pit
 	destination.w = viewport.w;
 	destination.h = viewport.h;
 	if (destination.w <= 0 || destination.h <= 0) {
+		if (++ra_diag_viewport <= 3) {
+			SDL_Log("RADIAG ZERO VIEWPORT w=%d h=%d (src %dx%d)", destination.w, destination.h, width, height);
+		}
 		return;
 	}
+	++ra_diag_presented;
 	SDL_SetRenderDrawColor(MacRenderer, 0, 0, 0, 255);
 	SDL_RenderClear(MacRenderer);
 	SDL_RenderCopy(MacRenderer, MacTexture, 0, &destination);

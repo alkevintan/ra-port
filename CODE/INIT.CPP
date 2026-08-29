@@ -1,3 +1,9 @@
+#if defined(__ANDROID__)
+#include <android/log.h>
+#define RA_BREAD(m) __android_log_print(ANDROID_LOG_INFO, "RADIAG", "init: %s", m)
+#else
+#define RA_BREAD(m) ((void)0)
+#endif
 /*
  * Copyright 2025 Electronic Arts Inc.
  *
@@ -158,6 +164,7 @@ bool Init_Game(int , char * [])
 	/*
 	**	Initialize the encryption keys.
 	*/
+	RA_BREAD("Init_Keys");
 	Init_Keys();
 
 	/*
@@ -171,13 +178,16 @@ bool Init_Game(int , char * [])
 	**	Check for an initialize a working mouse pointer. Display error and bail if
 	**	no mouse driver is installed.
 	*/
+	RA_BREAD("Init_Mouse");
 	Init_Mouse();
 
 	/*
 	**	Initialize access to the CD-ROM and ensure that the CD is inserted. This can, and
 	**	most likely will, result in a visible prompt.
 	*/
+	RA_BREAD("before Init_CDROM_Access");
 	Init_CDROM_Access();
+	RA_BREAD("after Init_CDROM_Access");
 
 	if (Special.IsFromInstall) {
 		Load_Prolog_Page();
@@ -186,7 +196,9 @@ bool Init_Game(int , char * [])
 	/*
 	**	Register and cache any secondary mixfiles.
 	*/
+	RA_BREAD("before Init_Secondary_Mixfiles");
 	Init_Secondary_Mixfiles();
+	RA_BREAD("after Init_Secondary_Mixfiles");
 
 	/*
 	**	This is a special hack to initialize the heaps that must be in place before the
@@ -241,7 +253,9 @@ bool Init_Game(int , char * [])
 	/*
 	**	Initialize the game object heaps as well as other rules-dependant buffer allocations.
 	*/
+	RA_BREAD("before Init_Heaps");
 	Init_Heaps();
+	RA_BREAD("after Init_Heaps");
 
 	/*
 	**	Initialize the animation system.
@@ -2814,8 +2828,25 @@ static void Init_Fonts(void)
  *=============================================================================================*/
 static void Init_CDROM_Access(void)
 {
+	RA_BREAD("CDROM: entered");
+#if defined(__ANDROID__)
+	RA_BREAD("CDROM: bypassed on Android (no optical drive)");
+	return;
+#endif
 	VisiblePage.Clear();
+	RA_BREAD("CDROM: VisiblePage.Clear done");
 	HidPage.Clear();
+	RA_BREAD("CDROM: HidPage.Clear done");
+
+#if defined(__ANDROID__)
+	/*
+	**	Android has no CD-ROM. Game data is extracted to local storage, so the
+	**	drive-letter scan in Force_CD_Available()/Set_Search_Drives("?:\\")
+	**	never terminates. Skip the CD handshake entirely.
+	*/
+	RA_BREAD("Init_CDROM_Access: bypassed on Android");
+	return;
+#endif
 
 #ifdef FIXIT_VERSION_3
 	//	Determine if we're going to be running from a DVD.
